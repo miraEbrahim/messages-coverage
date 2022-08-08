@@ -1,0 +1,126 @@
+<html>
+
+<head>
+  <title>SIMPLE NOTE APP</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+
+<body>
+  <div class="container">
+    
+    <ul>
+     <li> <%= siteKey %></li>
+     <li> <%= moduleName %></li>
+     <li> <%= startDate %></li>
+     <li> <%= endDate %></li>
+     <li> <%= experienceId %></li>
+    </ul>
+    </div>
+    <canvas id="myChart" width="100" height="100"></canvas>
+    <div class="footer">
+      <p></p>
+    </div>
+  <script>
+      var codeLabel = [],
+          coverageData = [];
+      async function MessagesChart() {
+          await getMessagesData()
+          const ctx = document.getElementById('myChart').getContext('2d');
+          // Change default options for ALL charts
+          Chart.defaults.set('plugins.datalabels', {
+              color: '#FFF',
+              formatter: function (value, context) {
+                  return value + '%';
+              }
+          });
+          const chart = new Chart(ctx, {
+              plugins: [ChartDataLabels],
+              type: 'pie',
+              data: {
+                  labels: coverageCode,
+                  datasets: [{
+                      label: 'Messages Coverage',
+                      data: coverageData,
+                      backgroundColor: [
+                          '#4dc9f6',
+                          '#f67019',
+                          '#f53794',
+                          '#537bc4',
+                          '#acc236',
+                          '#166a8f',
+                          '#DC143C',
+                          '#58595b',
+                          '#8549ba',
+                          '#00FFFF',
+                          '#008080',
+                          '#FF00FF',
+                          '#800080',
+                          '#A52A2A',
+                          'A0522DD'
+                      ],
+                  }],
+                  hoverOffset: 4
+              },
+              options: {
+                  formatter: function (value, context) {
+                      return context.dataIndex + context.dataset + ': ' + value;
+                  },
+                  // tooltips: { enabled: false },
+                  plugins: {
+                      legend: {
+                          position: 'top',
+                      },
+                      title: {
+                          display: true,
+                          padding: {
+                              top: 10,
+                              bottom: 30
+                          }
+                      },
+                      subtitle: {
+                          display: true,
+                          text: 'Message Coverage'
+                      }
+                  }
+              }
+          })
+      }
+      MessagesChart();
+      //Fetch Data from API
+      async function getMessagesData() {
+          let site_key = document.querySelector('.site-key').innerHTML,
+              module_name = document.querySelector('.module-name').innerHTML,
+              start_date = document.querySelector('.start-date').innerHTML,
+              end_date = document.querySelector('.start-date').innerHTML,
+              experience_id = document.querySelector('.experience-id').innerHTML;
+          //   experiment_id= document.querySelector('li.experiment-id').innerHTML,
+          //   experiment_group= document.querySelector('li.experiment-group').innerHTML;
+          let siteKey = site_key.trim(),
+              moduleName = module_name.trim(),
+              startDate = start_date.trim(),
+              endDate = end_date.trim(),
+              experienceId = experience_id.trim();
+          // experimentId = experiment_id.trim(),
+          // experimentGroup = experiment_group.trim();
+          const taggUrl = `http://prdreporting01.taggstar.net:8000/api/v4/site/${siteKey}/module/${moduleName}/impressions/messages/report?startDate=${startDate}&endDate=${endDate}&experienceId=${experienceId}`;
+          const response = await fetch(taggUrl);
+          const pieChatData = await response.json();
+          // const overallCoverage = pieChatData.messageCoverage;
+          // const overallCoveragePercent = overallCoverage//Number((overallCoverage * 100)).toFixed(2);
+          const coverage = pieChatData.messageValues.map((x) => Number((x.coverage * 100)).toFixed(2));
+          const code = pieChatData.messageValues.map((x) => x.code);
+          const codeCoverage = pieChatData.messageValues.map((x) => x.code + ' ' + Number((x.coverage * 100)).toFixed(2) + '%');
+          coverageData = coverage
+          codeLabel = code
+          coverageCode = codeCoverage
+          // oCoverage = overallCoveragePercent
+      }
+  </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</body>
+
+
+</html>
